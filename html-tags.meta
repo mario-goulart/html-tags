@@ -1,0 +1,9 @@
+;;; html-tags.meta -*- Scheme -*-
+
+((egg "html-tags.egg")
+ (synopsis "Procedures to generate [X]HTML code")
+ (category web)
+ (license "BSD")
+ (doc-from-wiki)
+ (author "Mario Domenech Goulart")
+ (files "html-tags.setup" "html-tags.scm" "html-tags.html"))
