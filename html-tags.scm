@@ -6,7 +6,7 @@
   
   (define-for-syntax tags/attribs
     (let ((common-attribs
-           '(quote-procedure:
+           '(quote-procedure: convert-to-entities?:
              id: class: lang title style dir lang xml:lang tabindex:
              accesskey: onclick: onabort: onblur: onchange: onclick: ondblclick:
              onfocus: onkeydown: onkeypress: onkeyup: onload: onmousedown:
@@ -120,6 +120,10 @@
              (var          )
              ))))
 
+  (define (htmlize str) ;; stolen from spiffy
+    (string-translate* str '(("<" . "&lt;")    (">" . "&gt;")
+                             ("\"" . "&quot;") ("'" . "&#x27;") ("&" . "&amp;"))))
+
   (define open-only-tags (map symbol->string '(br embed hr img input link meta)))
   
   (define check-html-syntax (make-parameter #f))
@@ -138,7 +142,8 @@
                      (contents "")
                      (open-only (member ,tag open-only-tags))
                      (quote-proc (or (get-keyword 'quote-procedure: attribs)
-                                     (lambda (text) (string-append "'" text "'")))))
+                                     (lambda (text) (string-append "'" text "'"))))
+                     (convert-to-entities? (get-keyword 'convert-to-entities?: attribs)))
                  (for-each (lambda (attr/val)
                              (unless (null? attr/val)
                                (let ((attr (car attr/val))
@@ -148,7 +153,7 @@
                                        (when check-syntax
                                          (unless (memq attr tag-attribs)
                                            (set! warnings (cons attr warnings))))
-                                       (unless (eq? attr 'quote-procedure:)
+                                       (unless (memq attr '(quote-procedure: convert-to-entities?:))
                                          (unless (null? val)
                                            (let* ((val (car val))
                                                   (boolean-val? (boolean? val)))
@@ -170,16 +175,19 @@
                                                (if (and open-only (xhtml-style?))
                                                    " />"
                                                    ">")))
-                 (string-append (if (null? warnings)
-                                    ""
-                                    (string-append "<!-- WARNING: (" ,tag "): invalid attributes: "
-                                                   (string-intersperse (map ->string warnings)) " -->"))
-                                tag-text
-                                contents
-                                (if open-only
-                                    ""
-                                    (string-append "</" ,tag ">")))
-                 )))))))
+                 (let ((result
+                        (string-append (if (null? warnings)
+                                           ""
+                                           (string-append "<!-- WARNING: (" ,tag "): invalid attributes: "
+                                                          (string-intersperse (map ->string warnings)) " -->"))
+                                       tag-text
+                                       contents
+                                       (if open-only
+                                           ""
+                                           (string-append "</" ,tag ">")))))
+                   (if convert-to-entities?
+                       (htmlize result)
+                       result)))))))))
   
   (define-syntax make-tags
     (lambda (exp r cmp)
