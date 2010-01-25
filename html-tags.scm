@@ -120,7 +120,7 @@
              (var          )
              ))))
 
-  (define open-only-tags (map symbol->string '(br embed hr img input link meta)))
+  (define open-only-tags (map symbol->string '(base br col embed hr img input link meta param)))
   
   (define check-html-syntax (make-parameter #f))
   
