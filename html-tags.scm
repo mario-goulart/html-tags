@@ -1,6 +1,7 @@
 (module html-tags *
   
   (import scheme chicken srfi-1 srfi-13 data-structures)
+  (use utils)
     
   (define xhtml-style? (make-parameter #f))
   
