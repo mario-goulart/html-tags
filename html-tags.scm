@@ -186,6 +186,9 @@
                                 (if open-only
                                     ""
                                     (string-append "</" ,tag ">"))))))))))
+
+  (define (<!-- . comments)
+    (string-append "<!-- " (string-intersperse (map ->string comments)) " -->"))
   
   (define-syntax make-tags
     (lambda (exp r cmp)
