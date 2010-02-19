@@ -8,21 +8,21 @@
   (define-for-syntax tags/attribs
     (let ((common-attribs
            '(quote-procedure: convert-to-entities?:
-             id: class: lang title style dir lang xml:lang tabindex:
-             accesskey: onclick: onabort: onblur: onchange: onclick: ondblclick:
+             id: class: lang: title: style: dir: lang: xml:lang: tabindex:
+             accesskey: onabort: onblur: onchange: onclick: ondblclick:
              onfocus: onkeydown: onkeypress: onkeyup: onload: onmousedown:
              onmousemove: onmouseover: onmouseout: onmouseup: onreset:
              onselect: onsubmit: onunload:
              )))
       (map (lambda (tags/attribs)
              (append tags/attribs common-attribs))
-           '((a            name: href: hreflang: type: rel: rev: charset: coords: shape: accesskey: tabindex: target:)
+           '((a            name: href: hreflang: type: rel: rev: charset: coords: shape: target:)
              (abbr         )
              (acronym      )
              (address      )
              (applet       )
-             (area         accesskey: alt: coords: hash: host: hostname: href: noHref: pathname:
-                           port: protocol: search: shape: tabindex: target:)
+             (area         alt: coords: hash: host: hostname: href: noHref: pathname:
+                           port: protocol: search: shape: target:)
              (b            )
              (base         href: target:)
              (basefont     )
@@ -30,10 +30,10 @@
              (big          )
              (blink        ) ;; attributes?
              (blockquote   )
-             (body         background: bgcolor: text: link: vlink: alink: accesskey: aLink: scrollleft: scrolltop:)
+             (body         background: bgcolor: text: link: vlink: alink: aLink: scrollleft: scrolltop:)
              (bold         )
              (br           clear:)
-             (button       accesskey: disabled: form: name: tabindex: type: value:)
+             (button       disabled: form: name: type: value:)
              (caption      )
              (center       )
              (cite         )
@@ -51,7 +51,7 @@
                            autostart: loop: playcount: volume: controls: controller: mastersound: starttime: endtime:)
              (fieldset     )
              (font         color: face: size:)
-             (form         action: method: acceptcharset: encoding: enctype: length: name: tabindex: target:)
+             (form         action: method: acceptcharset: encoding: enctype: length: name: target:)
              (frame        src: contentdocument: frameborder: longdesc: marginheight: marginwidth: name: noresize: scrolling:)
              (frameset     rows: cols:)
              (h1           align:)
@@ -67,11 +67,11 @@
              (iframe       src: width: align: height: contentdocument: frameborder: longdesc:
                            marginheight: marginwidth: name: noresize: scrolling:)
              (img          src: alt: align: height: width: border: hspace: vspace: usemap: ismap: longdesc: lowsrc:)
-             (input        type: name: value: size: maxlength: checked: src: accept: accesskey:
-                           align: alt: defaultchecked: disabled: form: tabindex:)
+             (input        type: name: value: size: maxlength: checked: src: accept:
+                           align: alt: defaultchecked: disabled: form:)
              (ins          )
              (kbd          )
-             (label        for: accesskey: onfocus: onblur:)
+             (label        for: onfocus: onblur:)
              (legend       )
              (li           type: value:)
              (link         charset: disabled: href: hreflang: media: name: rev: rel: target: type:)
@@ -92,7 +92,7 @@
              (script       src: type: language:)
              (s            )
              (samp         )
-             (select       name: accesskey: align: disabled: form: length: multiple: selectedindex: size: tabindex: type: value:)
+             (select       name: align: disabled: form: length: multiple: selectedindex: size: type: value:)
              (small        )
              (span         )
              (strong       )
@@ -101,20 +101,20 @@
              (strike       )
              (style        media: type:)
              (table        align: border: cellspacing: cellpadding: color: frame: rules: summary: valign: width: bgcolor:)
-             (td           rowspan: colspan: nowrap: align: valign: width: height: abbr: accesskey: axis: background:
+             (td           rowspan: colspan: nowrap: align: valign: width: height: abbr: axis: background:
                            bgcolor: bordercolor: cellindex: ch: choff: disabled: headers: innerhtml: innertext:
-                           rowspan: scope: tabindex:)
-             (textarea     name: rows: cols: wrap: accesskey: defaultvalue: disabled: readonly: form:)
+                           rowspan: scope:)
+             (textarea     name: rows: cols: wrap: defaultvalue: disabled: readonly: form:)
              (thead        )
              (tbody        )
              (tfoot        )
-             (th           rowspan: colspan: nowrap: align: valign: width: height: abbr: accesskey: axis: background:
+             (th           rowspan: colspan: nowrap: align: valign: width: height: abbr: axis: background:
                            bgcolor: bordercolor: cellindex: ch: choff: disabled: headers: innerhtml: innertext:
-                           rowSpan: scope: tabindex:)
+                           rowSpan: scope:)
              (title        )
              (tr           align: valign: bgcolor: rowspan: colspan: nowrap: align: valign: width: height: abbr:
-                           accesskey: axis: background: bgcolor: bordercolor: rowindex: ch: choff: disabled: headers:
-                           innerhtml: innertext: scope: tabindex: sectionrowindex: outerhtml: outertext:)
+                           axis: background: bgcolor: bordercolor: rowindex: ch: choff: disabled: headers:
+                           innerhtml: innertext: scope: sectionrowindex: outerhtml: outertext:)
              (tt           )
              (u            bgcolor:)
              (ul           type compact:)
