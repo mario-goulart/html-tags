@@ -5,5 +5,4 @@
  (category web)
  (license "BSD")
  (doc-from-wiki)
- (author "<a href=\"http://chicken.wiki.br/users/mario-domenech-goulart\">Mario Domenech Goulart</a>")
- (files "html-tags.setup" "html-tags.scm" "html-tags.html"))
+ (author "<a href=\"http://chicken.wiki.br/users/mario-domenech-goulart\">Mario Domenech Goulart</a>"))
