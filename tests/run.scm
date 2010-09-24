@@ -1,9 +1,6 @@
 #!/usr/bin/csi -script
 
-(use test)
-
-(load "html-tags.scm")
-(import html-tags)
+(use test html-tags)
 
 (xhtml-style? #t)
 
