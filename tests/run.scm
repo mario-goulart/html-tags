@@ -19,3 +19,4 @@
 (test "<select><option value='val'>opt</option></select>" (<select> (<option> value: "val" selected: #f "opt")))
 (test "<p>&lt;p&gt;hello&lt;/p&gt;</p>" (<p> convert-to-entities?: #t (<p> "hello")))
 
+(unless (zero? (test-failure-count)) (exit 1))
