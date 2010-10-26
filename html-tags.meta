@@ -4,4 +4,5 @@
  (synopsis "Procedures to generate [X]HTML code")
  (category web)
  (license "BSD")
+ (test-depends test)
  (author "<a href=\"http://chicken.wiki.br/users/mario-domenech-goulart\">Mario Domenech Goulart</a>"))
