@@ -98,7 +98,7 @@ xhtml-style? check-html-syntax?)
            (noscript     )
            (object       )
            (option       value: defaultselected: disabled: form: index: label: selected: text:)
-           (optgroup     )
+           (optgroup     label: disabled:)
            (ol           )
            (p            align:) ;; something else?
            (param        )
