@@ -19,4 +19,18 @@
 (test "<select><option value='val'>opt</option></select>" (<select> (<option> value: "val" selected: #f "opt")))
 (test "<p>&lt;p&gt;hello&lt;/p&gt;</p>" (<p> convert-to-entities?: #t (<p> "hello")))
 
+
+(generate-sxml? #t)
+
+(test '(html) (<html>))
+(test '(p (@ (align "center"))) (<p> align: "center"))
+(test '(a (@ (href "ali")) "opa") (<a> href: "ali" "opa"))
+(test '(pre "a") (<pre> "a"))
+(test '(div (@ (id "some")) (img (@ (src "pic.jpg")))) (<div> id: "some" (<img> src: "pic.jpg")))
+(test '(div (p "a") (p "b")) (<div> (<p> "a") (<p> "b")))
+(test '(p (@ (align "center")) "alo" "alo") (<p> align: "center"  "alo" "alo"))
+(test '(select (option (@ (value "val") (selected)) "opt")) (<select> (<option> value: "val" selected: #t "opt")))
+(test '(select (option (@ (value "val")) "opt")) (<select> (<option> value: "val" selected: #f "opt")))
+(test '(p foo) (<p> 'foo))
+
 (test-exit)
