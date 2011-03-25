@@ -5,4 +5,5 @@
  (category web)
  (license "BSD")
  (test-depends test)
- (author "<a href=\"http://chicken.wiki.br/users/mario-domenech-goulart\">Mario Domenech Goulart</a>"))
+ (author "<a href=\"http://chicken.wiki.br/users/mario-domenech-goulart\">Mario Domenech Goulart</a>")
+ (files "html-tags.scm" "html-tags.setup" "html-tags.meta" "tests/run.scm" "html-tags.release-info"))
