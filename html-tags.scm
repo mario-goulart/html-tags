@@ -12,6 +12,13 @@
 <sup> <strike> <style> <table> <td> <textarea> <thead> <tbody> <tfoot>
 <th> <title> <tr> <tt> <u> <ul> <var> <!--
 
+;; html5-related procedures
+<article> <aside> <audio> <canvas> <command> <datagrid> <datalist>
+<datatemplate> <details> <dialog> <embed> <eventsource> <figure>
+<footer> <header> <hgroup> <keygen> <mark> <meter> <nav> <nest>
+<output> <progress> <rp> <rt> <ruby> <rule> <section> <source>
+<summary> <time> <video> <wbr>
+
 ;; parameters
 xhtml-style? check-html-syntax? generate-sxml?)
 
@@ -38,6 +45,9 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (applet       )
            (area         alt: coords: hash: host: hostname: href: noHref: pathname:
                          port: protocol: search: shape: target:)
+           (article      ) ; html5
+           (aside        ) ; html5
+           (audio        ) ; html5
            (b            )
            (base         href: target:)
            (basefont     )
@@ -50,12 +60,19 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (br           clear:)
            (button       disabled: form: name: type: value:)
            (caption      )
+           (canvas       ) ; html5
            (center       )
            (cite         )
            (code         )
            (colgroup     )
+           (command      ) ; html5
+           (datagrid     ) ; html5
+           (datalist     ) ; html5
+           (datatemplate ) ; html5
            (dd           )
            (del          )
+           (details      ) ; html5
+           (dialog       ) ; html5
            (dir          )
            (div          )
            (dfn          )
@@ -64,9 +81,12 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (em           )
            (embed        src: width: height: align: name: pluginspage: pluginurl: hidden: href: target: units:
                          autostart: loop: playcount: volume: controls: controller: mastersound: starttime: endtime:)
+           (eventsource  ) ; html5
            (fieldset     )
+           (figure       ) ; html5
            (font         color: face: size:)
            (form         action: method: acceptcharset: encoding: enctype: length: name: target:)
+           (footer       ) ; html5
            (frame        src: contentdocument: frameborder: longdesc: marginheight: marginwidth: name: noresize: scrolling:)
            (frameset     rows: cols:)
            (h1           align:)
@@ -76,6 +96,8 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (h5           align:)
            (h6           align:)
            (head         )
+           (header       ) ; html5
+           (hgroup       ) ; html5
            (html         )
            (hr           align:)
            (i            )
@@ -85,33 +107,47 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (input        type: name: value: size: maxlength: checked: src: accept:
                          align: alt: defaultchecked: disabled: form:)
            (ins          )
+           (keygen       ) ; html5
            (kbd          )
            (label        for: onfocus: onblur:)
            (legend       )
            (li           type: value:)
            (link         charset: disabled: href: hreflang: media: name: rev: rel: target: type:)
            (map          )
+           (mark         ) ; html5
            (menu         )
            (meta         name: content: charset: disabled: http-equiv: scheme:)
+           (meter        ) ; html5
+           (nav          ) ; html5
+           (nest         ) ; html5
            (noembed      )
            (noframes     )
            (noscript     )
            (object       )
+           (ol           )
            (option       value: defaultselected: disabled: form: index: label: selected: text:)
            (optgroup     label: disabled:)
-           (ol           )
+           (output       ) ; html5
            (p            align:) ;; something else?
            (param        )
            (pre          width:)
+           (progress     ) ; html5
            (q            )
-           (script       src: type: language:)
+           (rp           ) ; html5
+           (rt           ) ; html5
+           (ruby         ) ; html5
+           (rule         ) ; html5
            (s            )
            (samp         )
+           (script       src: type: language:)
+           (section      ) ; html5
            (select       name: align: disabled: form: length: multiple: selectedindex: size: type: value:)
            (small        )
+           (source       ) ; html5
            (span         )
            (strong       )
            (sub          )
+           (summary      ) ; html5
            (sup          )
            (strike       )
            (style        media: type:)
@@ -126,6 +162,7 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (th           rowspan: colspan: nowrap: align: valign: width: height: abbr: axis: background:
                          bgcolor: bordercolor: cellindex: ch: choff: disabled: headers: innerhtml: innertext:
                          rowSpan: scope:)
+           (time         ) ; html5
            (title        )
            (tr           align: valign: bgcolor: rowspan: colspan: nowrap: align: valign: width: height: abbr:
                          axis: background: bgcolor: bordercolor: rowindex: ch: choff: disabled: headers:
@@ -134,6 +171,8 @@ xhtml-style? check-html-syntax? generate-sxml?)
            (u            bgcolor:)
            (ul           type compact:)
            (var          )
+           (video        ) ; html5
+           (wbr          ) ; html5
            ))))
 
 (define open-only-tags (map symbol->string '(base br col embed hr img input link meta param)))
@@ -207,9 +246,10 @@ xhtml-style? check-html-syntax? generate-sxml?)
                                        (val (cdr attr/val)))
                                    (if (keyword? attr)
                                        (begin
-                                         (when check-syntax
-                                           (unless (memq attr tag-attribs)
-                                             (set! warnings (cons attr warnings))))
+                                         (when (and check-syntax
+                                                    (not (memq attr tag-attribs))
+                                                    (not (string-prefix? "data-" (->string attr))))
+                                           (set! warnings (cons attr warnings)))
                                          (unless (memq attr '(quote-procedure: convert-to-entities?:))
                                            (unless (null? val)
                                              (let* ((val (car val))
@@ -234,7 +274,7 @@ xhtml-style? check-html-syntax? generate-sxml?)
                                                      ">")))
                    (string-append (if (null? warnings)
                                       ""
-                                      (string-append "<!-- WARNING: (" ,tag "): invalid attributes: "
+                                      (string-append "<!-- WARNING: (<" ,tag ">): invalid attributes: "
                                                      (string-intersperse (map ->string warnings)) " -->"))
                                   tag-text
                                   (if convert-to-entities?
