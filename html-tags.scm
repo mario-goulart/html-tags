@@ -14,9 +14,9 @@
 
 ;; html5-related procedures
 <article> <aside> <audio> <canvas> <command> <datagrid> <datalist>
-<datatemplate> <details> <dialog> <embed> <eventsource> <figure>
-<footer> <header> <hgroup> <keygen> <mark> <meter> <nav> <nest>
-<output> <progress> <rp> <rt> <ruby> <rule> <section> <source>
+<datatemplate> <details> <dialog> <embed> <eventsource> <figcaption>
+<figure> <footer> <header> <hgroup> <keygen> <mark> <meter> <nav>
+<nest> <output> <progress> <rp> <rt> <ruby> <rule> <section> <source>
 <summary> <time> <video> <wbr>
 
 ;; parameters
@@ -83,6 +83,7 @@ xhtml-style? check-html-syntax? generate-sxml?)
                          autostart: loop: playcount: volume: controls: controller: mastersound: starttime: endtime:)
            (eventsource  ) ; html5
            (fieldset     )
+           (figcaption   ) ; html5
            (figure       ) ; html5
            (font         color: face: size:)
            (form         action: method: acceptcharset: encoding: enctype: length: name: target:)
