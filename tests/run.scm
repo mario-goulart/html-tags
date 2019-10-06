@@ -1,6 +1,11 @@
-#!/usr/bin/csi -script
-
-(use test html-tags)
+(cond-expand
+ (chicken-4
+  (use html-tags test))
+ (chicken-5
+  (import (chicken string))
+  (import html-tags test))
+ (else
+  (error "Unsupported CHICKEN version.")))
 
 (xhtml-style? #t)
 

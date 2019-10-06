@@ -22,8 +22,20 @@
 ;; parameters
 xhtml-style? check-html-syntax? generate-sxml?)
 
-(import scheme chicken srfi-1 srfi-13 data-structures)
-(use utils)
+(import scheme)
+(cond-expand
+ (chicken-4
+  (import scheme chicken srfi-1 srfi-13 data-structures)
+  (use utils))
+ (chicken-5
+  (import (chicken base)
+          (chicken keyword)
+          (chicken string)
+          (chicken syntax))
+  (import-for-syntax (chicken string))
+  (import srfi-1 srfi-13))
+ (else
+  (error "Unsupported CHICKEN version.")))
 
 (define xhtml-style? (make-parameter #f))
 
@@ -183,117 +195,119 @@ xhtml-style? check-html-syntax? generate-sxml?)
 (define generate-sxml? (make-parameter #f))
 
 (define-syntax make-tag
-  (lambda (exp r cmp)
-    (let ((tag (cadr exp)))
-      `(,(r 'define) ,(string->symbol (string-append "<" (symbol->string tag) ">"))
-        (,(r 'lambda) attribs
-         (if (generate-sxml?)
+  (er-macro-transformer
+   (lambda (exp r cmp)
+     (let ((tag (cadr exp)))
+       `(,(r 'define) ,(string->symbol (string-append "<" (symbol->string tag) ">"))
+         (,(r 'lambda) attribs
+          (if (generate-sxml?)
 
-             ;; SXML generation
-             (let ((sxml-attrs/vals '())
-                   (attrs/vals (chop attribs 2))
-                   (contents '())
-                   (keyword->symbol
-                    (lambda (k)
-                      (string->symbol (string-chomp (symbol->string k) ":")))))
-               (for-each (lambda (attr/val)
-                           (unless (null? attr/val)
-                             (let ((attr (car attr/val))
-                                   (val (cdr attr/val)))
-                               (if (keyword? attr)
-                                   (unless (null? val)
-                                     (let* ((val (car val))
-                                            (boolean-val? (boolean? val)))
-                                       (if boolean-val?
-                                           (when val
-                                             (set! sxml-attrs/vals
-                                                   (append sxml-attrs/vals
-                                                           (list (list (keyword->symbol attr))))))
-                                           (set! sxml-attrs/vals
-                                                 (append sxml-attrs/vals
-                                                         (list (list (keyword->symbol attr)
-                                                                     (->string val))))))))
-                                   (set! contents
-                                         (append contents
-                                                 (list attr)
-                                                 (if (null? val)
-                                                     '()
-                                                     (list (car val)))))))))
-                         attrs/vals)
-               (append (list ',tag)
-                       (if (null? sxml-attrs/vals)
-                           '()
-                           (list (cons '@ sxml-attrs/vals)))
-                       contents))
+              ;; SXML generation
+              (let ((sxml-attrs/vals '())
+                    (attrs/vals (chop attribs 2))
+                    (contents '())
+                    (keyword->symbol
+                     (lambda (k)
+                       (string->symbol (string-chomp (keyword->string k) ":")))))
+                (for-each (lambda (attr/val)
+                            (unless (null? attr/val)
+                              (let ((attr (car attr/val))
+                                    (val (cdr attr/val)))
+                                (if (keyword? attr)
+                                    (unless (null? val)
+                                      (let* ((val (car val))
+                                             (boolean-val? (boolean? val)))
+                                        (if boolean-val?
+                                            (when val
+                                              (set! sxml-attrs/vals
+                                                    (append sxml-attrs/vals
+                                                            (list (list (keyword->symbol attr))))))
+                                            (set! sxml-attrs/vals
+                                                  (append sxml-attrs/vals
+                                                          (list (list (keyword->symbol attr)
+                                                                      (->string val))))))))
+                                    (set! contents
+                                          (append contents
+                                                  (list attr)
+                                                  (if (null? val)
+                                                      '()
+                                                      (list (car val)))))))))
+                          attrs/vals)
+                (append (list ',tag)
+                        (if (null? sxml-attrs/vals)
+                            '()
+                            (list (cons '@ sxml-attrs/vals)))
+                        contents))
 
-             ;; Strings generation
-             ,(let ((tag (->string tag)))
-                `(let ((tag-attribs (quote ,(alist-ref (string->symbol tag) tags/attribs)))
-                       (check-syntax (check-html-syntax?))
-                       (warnings '())
-                       (tag-text (string-append "<" ,tag))
-                       (attrs/vals (chop attribs 2))
-                       (contents "")
-                       (open-only (member ,tag open-only-tags))
-                       (quote-proc (or (get-keyword 'quote-procedure: attribs)
-                                       (lambda (text) (string-append "'" text "'"))))
-                       (convert-to-entities? (get-keyword 'convert-to-entities?: attribs))
-                       (htmlize (lambda (str) ;; stolen from spiffy
-                                  (string-translate* str '(("<" . "&lt;")    (">" . "&gt;")
-                                                           ("\"" . "&quot;") ("'" . "&#x27;") ("&" . "&amp;"))))))
-                   (for-each (lambda (attr/val)
-                               (unless (null? attr/val)
-                                 (let ((attr (car attr/val))
-                                       (val (cdr attr/val)))
-                                   (if (keyword? attr)
-                                       (begin
-                                         (when (and check-syntax
-                                                    (not (memq attr tag-attribs))
-                                                    (not (string-prefix? "data-" (->string attr))))
-                                           (set! warnings (cons attr warnings)))
-                                         (unless (memq attr '(quote-procedure: convert-to-entities?:))
-                                           (unless (null? val)
-                                             (let* ((val (car val))
-                                                    (boolean-val? (boolean? val)))
-                                               (if boolean-val?
-                                                   (when val
-                                                     (set! tag-text (string-append tag-text " " (keyword->string attr))))
-                                                   (set! tag-text
-                                                         (string-append tag-text
-                                                                        " "
-                                                                        (keyword->string attr)
-                                                                        "="
-                                                                        (quote-proc (->string val)))))))))
-                                       (set! contents (string-append contents (->string attr)
-                                                                     (if (null? val)
-                                                                         ""
-                                                                         (->string (car val)))))))))
-                             attrs/vals)
-                   (set! tag-text (string-append tag-text
-                                                 (if (and open-only (xhtml-style?))
-                                                     " />"
-                                                     ">")))
-                   (string-append (if (null? warnings)
-                                      ""
-                                      (string-append "<!-- WARNING: (<" ,tag ">): invalid attributes: "
-                                                     (string-intersperse (map ->string warnings)) " -->"))
-                                  tag-text
-                                  (if convert-to-entities?
-                                      (htmlize contents)
-                                      contents)
-                                  (if open-only
-                                      ""
-                                      (string-append "</" ,tag ">")))))))))))
+              ;; Strings generation
+              ,(let ((tag (->string tag)))
+                 `(let ((tag-attribs (quote ,(alist-ref (string->symbol tag) tags/attribs)))
+                        (check-syntax (check-html-syntax?))
+                        (warnings '())
+                        (tag-text (string-append "<" ,tag))
+                        (attrs/vals (chop attribs 2))
+                        (contents "")
+                        (open-only (member ,tag open-only-tags))
+                        (quote-proc (or (get-keyword 'quote-procedure: attribs)
+                                        (lambda (text) (string-append "'" text "'"))))
+                        (convert-to-entities? (get-keyword 'convert-to-entities?: attribs))
+                        (htmlize (lambda (str) ;; stolen from spiffy
+                                   (string-translate* str '(("<" . "&lt;")    (">" . "&gt;")
+                                                            ("\"" . "&quot;") ("'" . "&#x27;") ("&" . "&amp;"))))))
+                    (for-each (lambda (attr/val)
+                                (unless (null? attr/val)
+                                  (let ((attr (car attr/val))
+                                        (val (cdr attr/val)))
+                                    (if (keyword? attr)
+                                        (begin
+                                          (when (and check-syntax
+                                                     (not (memq attr tag-attribs))
+                                                     (not (string-prefix? "data-" (->string attr))))
+                                            (set! warnings (cons attr warnings)))
+                                          (unless (memq attr '(quote-procedure: convert-to-entities?:))
+                                            (unless (null? val)
+                                              (let* ((val (car val))
+                                                     (boolean-val? (boolean? val)))
+                                                (if boolean-val?
+                                                    (when val
+                                                      (set! tag-text (string-append tag-text " " (keyword->string attr))))
+                                                    (set! tag-text
+                                                          (string-append tag-text
+                                                                         " "
+                                                                         (keyword->string attr)
+                                                                         "="
+                                                                         (quote-proc (->string val)))))))))
+                                        (set! contents (string-append contents (->string attr)
+                                                                      (if (null? val)
+                                                                          ""
+                                                                          (->string (car val)))))))))
+                              attrs/vals)
+                    (set! tag-text (string-append tag-text
+                                                  (if (and open-only (xhtml-style?))
+                                                      " />"
+                                                      ">")))
+                    (string-append (if (null? warnings)
+                                       ""
+                                       (string-append "<!-- WARNING: (<" ,tag ">): invalid attributes: "
+                                                      (string-intersperse (map ->string warnings)) " -->"))
+                                   tag-text
+                                   (if convert-to-entities?
+                                       (htmlize contents)
+                                       contents)
+                                   (if open-only
+                                       ""
+                                       (string-append "</" ,tag ">"))))))))))))
 
 (define (<!-- . comments)
   (string-append "<!-- " (string-intersperse (map ->string comments)) " -->"))
 
 (define-syntax make-tags
-  (lambda (exp r cmp)
-    `(begin
-       ,@(map (lambda (tag)
-                `(make-tag ,tag))
-              (map car tags/attribs)))))
+  (er-macro-transformer
+   (lambda (exp r cmp)
+     `(begin
+        ,@(map (lambda (tag)
+                 `(make-tag ,tag))
+               (map car tags/attribs))))))
 
 (make-tags tags)
 

@@ -1,0 +1,11 @@
+;;; html-tags.egg -*- Scheme -*-
+
+((synopsis "Procedures to generate [X]HTML code")
+ (category web)
+ (license "BSD")
+ (dependencies srfi-1 srfi-13)
+ (test-dependencies test)
+ (author "Mario Domenech Goulart")
+ (components
+  (extension html-tags)))
+
